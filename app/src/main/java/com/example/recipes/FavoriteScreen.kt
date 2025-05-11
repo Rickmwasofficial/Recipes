@@ -1,0 +1,19 @@
+package com.example.recipes
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.recipes.ui.theme.RecipesTheme
+
+@Composable
+fun FavoriteScreen(modifier: Modifier = Modifier) {
+
+}
+
+@Preview
+@Composable
+fun FavoriteScreenPreview() {
+    RecipesTheme {
+        FavoriteScreen()
+    }
+}
