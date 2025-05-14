@@ -40,7 +40,8 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -53,6 +54,18 @@ dependencies {
     implementation(libs.androidx.room.runtime.android)
     implementation(libs.androidx.animation.core.android)
     implementation(libs.androidx.animation.core.android)
+    implementation(libs.androidx.animation.android)
+    implementation(libs.androidx.animation.android)
+    implementation(libs.animation.core.android)
+    implementation(libs.animation.core.android)
+    implementation(libs.androidx.animation.android)
+    implementation(libs.animation.core.android)
+    implementation(libs.androidx.animation.android)
+    implementation(libs.androidx.animation.android)
+    implementation(libs.animation.core.android)
+    implementation(libs.androidx.animation.android)
+    implementation(libs.animation.core.android)
+    implementation(libs.animation.core.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -60,4 +73,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(kotlin("reflect"))
 }

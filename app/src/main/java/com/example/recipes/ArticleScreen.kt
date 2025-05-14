@@ -5,8 +5,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,20 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,38 +47,33 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.recipes.data.ArticleData.getArticles
 import com.example.recipes.data.MealData.getMeals
-import com.example.recipes.data.UserData
-import com.example.recipes.model.IngredientsModel
+import com.example.recipes.model.ArticlesModel
 import com.example.recipes.model.MealModel
-import com.example.recipes.ui.theme.RecipesTheme
-import com.example.recipes.boundsTransform
-
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RecipeScreen(sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, text: Int?, modifier: Modifier = Modifier) {
-    val currentMeal = getMeals()[text!!]
+fun ArticleScreen(sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, text: Int?, modifier: Modifier = Modifier) {
+    val currentArticle = getArticles()[text!!]
     Surface(
         modifier = modifier
             .fillMaxSize()
     ) {
-        var currentImageSize by remember { mutableStateOf(480.dp) }
+        var currentArticleImageSize by remember { mutableStateOf(480.dp) }
 
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
                 override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                     val delta = available.y
-                    val newImageSize = currentImageSize + delta.dp
+                    val newImageSize = currentArticleImageSize + delta.dp
 
                     // Constrain the image size within the allowed bounds
-                    currentImageSize = newImageSize.coerceIn(380.dp, 480.dp)
+                    currentArticleImageSize = newImageSize.coerceIn(300.dp, 480.dp)
 
                     // Return the consumed scroll amount
                     return Offset.Zero
@@ -95,31 +81,29 @@ fun RecipeScreen(sharedTransitionScope: SharedTransitionScope, animatedContentSc
             }
         }
         Box(Modifier.fillMaxSize().nestedScroll(nestedScrollConnection)) {
-            RecipeDesc(currentImageSize, sharedTransitionScope, animatedContentScope, navController = navController, meal = currentMeal, index = text)
+            ArticleDesc(currentArticleImageSize, sharedTransitionScope, animatedContentScope, navController = navController, article = currentArticle, index = text)
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .offset {
-                        IntOffset(0, currentImageSize.roundToPx())
+                        IntOffset(0, currentArticleImageSize.roundToPx())
                     }
                     .padding(bottom = 50.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item {
-                    Ingredients(meal = currentMeal)
-                }
-                item {
-                    About(meal = currentMeal)
+                    Article(article = currentArticle)
                 }
             }
         }
+
     }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, index: Int, modifier: Modifier = Modifier, meal: MealModel = getMeals()[19]) {
+fun ArticleDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, index: Int, modifier: Modifier = Modifier, article: ArticlesModel = getArticles()[0]) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -137,7 +121,7 @@ fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, an
             )
             with(sharedTransitionScope) {
                 Image(
-                    painter = painterResource(meal.img2),
+                    painter = painterResource(article.img1),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     alignment = Alignment.CenterStart,
@@ -145,7 +129,7 @@ fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, an
                     modifier = Modifier
                         .fillMaxSize()
                         .sharedElement(
-                            sharedContentState = rememberSharedContentState(key = "header-${index}"),
+                            sharedContentState = rememberSharedContentState(key = "articleHeader-${index}"),
                             animatedVisibilityScope = animatedContentScope,
                             boundsTransform = boundsTransform
                         )
@@ -212,69 +196,30 @@ fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, an
                     ) {
                         with(sharedTransitionScope) {
                             Text(
-                                text = stringResource(meal.name),
+                                text = stringResource(article.name),
                                 style = MaterialTheme.typography.headlineLarge,
                                 color = Color.White,
                                 fontWeight = FontWeight.ExtraBold,
                                 modifier = Modifier
                                     .sharedElement(
-                                        sharedContentState = rememberSharedContentState(key = "title-${index}"),
+                                        sharedContentState = rememberSharedContentState(key = "articleTitle-${index}"),
                                         animatedVisibilityScope = animatedContentScope,
                                         boundsTransform = boundsTransform
                                     )
                                     .width(250.dp)
                             )
-                            Row(
-                                modifier = Modifier
-                                    .height(20.dp)
-                                    .sharedElement(
-                                        sharedContentState = rememberSharedContentState(key = "row-${index}"),
-                                        animatedVisibilityScope = animatedContentScope,
-                                        boundsTransform = boundsTransform
-                                    ),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Image(
-                                        painter = painterResource(R.drawable.schedule_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(meal.time),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.ExtraBold
-                                    )
-                                }
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Image(
-                                        painter = painterResource(R.drawable.mood_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(14.dp),
-                                    )
-                                    Text(
-                                        text = stringResource(meal.servings),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.ExtraBold
-                                    )
-                                }
-                            }
+                            Text(
+                                text = stringResource(article.desc),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.sharedElement(
+                                    sharedContentState = rememberSharedContentState(key = "desc-${index}"),
+                                    animatedVisibilityScope = animatedContentScope,
+                                    boundsTransform = boundsTransform
+                                )
+                            )
                         }
-                        Text(
-                            text = stringResource(meal.shortDesc),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White,
-                            fontWeight = FontWeight.SemiBold
-                        )
                     }
 
                 }
@@ -285,71 +230,9 @@ fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, an
     }
 }
 
-@Composable
-fun IngredientCard(ingredient: IngredientsModel, modifier: Modifier = Modifier) {
-    Card (
-        modifier = modifier
-            .width(105.dp)
-            .height(120.dp)
-            .padding(end = 10.dp)
-            .clip(shape = RoundedCornerShape(15.dp)),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 10.dp,
-            draggedElevation = 20.dp,
-            pressedElevation = 20.dp
-        )
-    ) {
-        Column(
-            modifier = modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .background(color = Color.Transparent)
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.onBackground,
-                        shape = RoundedCornerShape(30.dp)
-                    )
-            ) {
-                Image(
-                    painter = painterResource(ingredient.img),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.TopCenter,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(shape = RoundedCornerShape(30.dp))
-                )
-            }
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(1.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(ingredient.name),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier,
-                    maxLines = 1
-                )
-                Text(
-                    text = stringResource(ingredient.qty),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                )
-            }
-        }
-    }
-}
 
 @Composable
-fun Ingredients(meal: MealModel, modifier: Modifier = Modifier) {
+fun Article(article: ArticlesModel, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -358,34 +241,7 @@ fun Ingredients(meal: MealModel, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Text(
-            text = stringResource(R.string.ingredients_title),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.ExtraBold
-        )
-        LazyRow() {
-            items(meal.ingredients) { ingredient ->
-                IngredientCard(ingredient)
-            }
-        }
-    }
-}
-
-@Composable
-fun About(meal: MealModel, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 18.dp, end = 1.dp, bottom = 10.dp, top = 15.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.about_title),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.ExtraBold
-        )
-        Text(
-            text = stringResource(meal.about),
+            text = stringResource(article.content),
             style = MaterialTheme.typography.bodyMedium
         )
         Button(
@@ -406,13 +262,5 @@ fun About(meal: MealModel, modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodyLarge
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RecipeScreenPreview() {
-    RecipesTheme(darkTheme = true) {
-//        RecipeScreen()
     }
 }

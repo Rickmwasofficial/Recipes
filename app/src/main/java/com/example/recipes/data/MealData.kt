@@ -7,6 +7,23 @@ import com.example.recipes.model.MealModel
 object MealData {
     private val allMeals = listOf(
         MealModel(
+            img1 = R.drawable.pancakes,
+            img2 = R.drawable.pancakes_alt,
+            name = R.string.pancakes_name,
+            shortDesc = R.string.pancakes_short_desc,
+            about = R.string.pancakes_about,
+            time = R.string.pancakes_time,
+            servings = R.string.pancakes_servings,
+            category = R.string.breakfast_category,
+            ingredients = listOf(
+                IngredientsModel(R.string.flour, R.string.flour_qty, R.drawable.flour_img),
+                IngredientsModel(R.string.eggs, R.string.eggs_qty, R.drawable.eggs_img),
+                IngredientsModel(R.string.milk, R.string.milk_qty, R.drawable.milk_img),
+                IngredientsModel(R.string.butter, R.string.butter_qty, R.drawable.butter_img),
+                IngredientsModel(R.string.syrup, R.string.syrup_qty, R.drawable.syrup_img)
+            )
+        ),
+        MealModel(
             img1 = R.drawable.pasta_dish,
             img2 = R.drawable.pasta_dish_alt,
             name = R.string.pasta_name,
@@ -51,23 +68,6 @@ object MealData {
                 IngredientsModel(R.string.bread, R.string.bread_qty, R.drawable.bread_img),
                 IngredientsModel(R.string.cheese, R.string.cheese_qty, R.drawable.cheese_img),
                 IngredientsModel(R.string.butter, R.string.butter_qty, R.drawable.butter_img)
-            )
-        ),
-        MealModel(
-            img1 = R.drawable.pancakes,
-            img2 = R.drawable.pancakes_alt,
-            name = R.string.pancakes_name,
-            shortDesc = R.string.pancakes_short_desc,
-            about = R.string.pancakes_about,
-            time = R.string.pancakes_time,
-            servings = R.string.pancakes_servings,
-            category = R.string.breakfast_category,
-            ingredients = listOf(
-                IngredientsModel(R.string.flour, R.string.flour_qty, R.drawable.flour_img),
-                IngredientsModel(R.string.eggs, R.string.eggs_qty, R.drawable.eggs_img),
-                IngredientsModel(R.string.milk, R.string.milk_qty, R.drawable.milk_img),
-                IngredientsModel(R.string.butter, R.string.butter_qty, R.drawable.butter_img),
-                IngredientsModel(R.string.syrup, R.string.syrup_qty, R.drawable.syrup_img)
             )
         ),
         MealModel(
