@@ -40,6 +40,8 @@ android {
 }
 
 dependencies {
+
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.material)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)
@@ -66,6 +68,7 @@ dependencies {
     implementation(libs.androidx.animation.android)
     implementation(libs.animation.core.android)
     implementation(libs.animation.core.android)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -74,4 +77,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(kotlin("reflect"))
+    implementation("com.airbnb.android:lottie:6.1.0")
 }

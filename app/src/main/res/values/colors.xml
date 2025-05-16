@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="btn">#FF4CB400</color>
     <color name="btn2">#507333</color>
+    <color name="primary">#496141</color>
+    <color name="transparent">#00000000</color>
 </resources>

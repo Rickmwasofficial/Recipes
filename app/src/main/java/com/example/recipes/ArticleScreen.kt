@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,9 +51,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.recipes.data.ArticleData.getArticles
-import com.example.recipes.data.MealData.getMeals
 import com.example.recipes.model.ArticlesModel
-import com.example.recipes.model.MealModel
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable

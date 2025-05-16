@@ -1,30 +1,20 @@
 package com.example.recipes
 
-import android.annotation.SuppressLint
 import android.os.Build
-import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.Spring.StiffnessHigh
 import androidx.compose.animation.core.Spring.StiffnessLow
-import androidx.compose.animation.core.Spring.StiffnessMediumLow
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,63 +28,45 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.content.res.TypedArrayUtils.getString
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.recipes.components.BottomNavSection
 import com.example.recipes.data.ArticleData.getArticles
-import com.example.recipes.data.MealData.getMeals
 import com.example.recipes.data.UserData
 import com.example.recipes.model.ArticlesModel
 import com.example.recipes.model.MealModel
 import com.example.recipes.ui.theme.RecipesTheme
-import java.time.format.TextStyle
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 val boundsTransform = BoundsTransform { initialBounds, targetBounds ->
@@ -104,13 +76,13 @@ val boundsTransform = BoundsTransform { initialBounds, targetBounds ->
 @OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeScreen(sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, navBackStackEntry: NavBackStackEntry, modifier: Modifier = Modifier) {
+fun HomeScreen(meals: List<MealModel>, articles: List<ArticlesModel>, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, navBackStackEntry: NavBackStackEntry, modifier: Modifier = Modifier) {
         Scaffold(
             modifier = modifier
                 .fillMaxSize(),
             containerColor = MaterialTheme.colorScheme.background
         ) { innerPadding ->
-            FullHomeScreen(sharedTransitionScope, animatedContentScope, navController, navBackStackEntry, modifier = Modifier.padding(innerPadding))
+            FullHomeScreen(meals, articles, sharedTransitionScope, animatedContentScope, navController, navBackStackEntry, modifier = Modifier.padding(innerPadding))
         }
 }
 
@@ -125,7 +97,7 @@ fun navigateToArticle(navController: NavHostController, articleNo: Int) {
 @OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FullHomeScreen(sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, navBackStackEntry: NavBackStackEntry, modifier: Modifier = Modifier) {
+fun FullHomeScreen(meals: List<MealModel>, articles: List<ArticlesModel>, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, navBackStackEntry: NavBackStackEntry, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -140,10 +112,10 @@ fun FullHomeScreen(sharedTransitionScope: SharedTransitionScope, animatedContent
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             item {
-                RecipesSection(sharedTransitionScope, animatedContentScope, navController)
+                RecipesSection(meals, sharedTransitionScope, animatedContentScope, navController)
             }
             item {
-                ArticleSection(sharedTransitionScope, animatedContentScope, navController)
+                ArticleSection(articles, sharedTransitionScope, animatedContentScope, navController)
             }
         }
         BottomNavSection(navBackStackEntry, navController)
@@ -496,8 +468,8 @@ fun ArticleCard(sharedTransitionScope: SharedTransitionScope, animatedContentSco
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RecipesSection(sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, modifier: Modifier = Modifier) {
-    val meals = getMeals()
+fun RecipesSection(meals: List<MealModel>, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, modifier: Modifier = Modifier) {
+
     val mealsCat1 = meals.map { it.category }.toSet()
     val mealsCat = mutableSetOf(R.string.all) + mealsCat1
     Column(
@@ -532,7 +504,8 @@ fun RecipesSection(sharedTransitionScope: SharedTransitionScope, animatedContent
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun ArticleSection(sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, modifier: Modifier = Modifier) {
+fun ArticleSection(articles: List<ArticlesModel>, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, modifier: Modifier = Modifier) {
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -547,7 +520,7 @@ fun ArticleSection(sharedTransitionScope: SharedTransitionScope, animatedContent
         )
 
         LazyRow() {
-            itemsIndexed(getArticles()) { index, article ->
+            itemsIndexed(articles) { index, article ->
                 ArticleCard(sharedTransitionScope, animatedContentScope, navController, index, article)
             }
         }

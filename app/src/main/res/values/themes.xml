@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.Recipes" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- This prevents the white flash during activity transitions -->
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
 
-    <style name="Theme.Recipes" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Recipes.Splash" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
 </resources>
