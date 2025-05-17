@@ -1,5 +1,9 @@
 package com.example.recipes
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,23 +20,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,17 +43,24 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import com.example.recipes.components.BottomNavSection
 import com.example.recipes.data.UserData.getUsers
+import com.example.recipes.model.ProfileCardsModel
 import com.example.recipes.ui.theme.RecipesTheme
+import kotlinx.coroutines.delay
+import kotlin.math.roundToInt
 
 @Composable
 fun ProfileScreen(navBackStackEntry: NavBackStackEntry, navController: NavHostController, modifier: Modifier = Modifier) {
@@ -58,9 +68,17 @@ fun ProfileScreen(navBackStackEntry: NavBackStackEntry, navController: NavHostCo
         modifier = modifier.fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background),
     ) { innerPadding ->
+        val profileCards: List<ProfileCardsModel> = listOf(
+            ProfileCardsModel(Icons.Filled.LocationOn, "My Address"),
+            ProfileCardsModel(Icons.Filled.AccountBox, "Account"),
+            ProfileCardsModel(Icons.Filled.Notifications, "Notifications"),
+            ProfileCardsModel(Icons.Filled.Phone, "Contact Us"),
+            ProfileCardsModel(Icons.Filled.Star, "Rate Our App")
+        )
         Column(
             modifier = Modifier
                 .padding(innerPadding)
+                .fillMaxSize()
         ) {
             TopProfile()
             LazyColumn(
@@ -70,7 +88,8 @@ fun ProfileScreen(navBackStackEntry: NavBackStackEntry, navController: NavHostCo
                 verticalArrangement = Arrangement.spacedBy(1.dp)
             ) {
                 item {
-                    ProfileCards()
+                    ProfileCard(profileCards.subList(0, 2), 15.dp)
+                    ProfileCard(profileCards.subList(2, 5), 1.dp)
                 }
             }
             BottomNavSection(navBackStackEntry, navController)
@@ -81,61 +100,112 @@ fun ProfileScreen(navBackStackEntry: NavBackStackEntry, navController: NavHostCo
 
 @Composable
 fun TopProfile(modifier: Modifier = Modifier) {
+    val shape = RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)
+    var isVisible by remember { mutableStateOf(false) }
+
+    // Trigger the animation after a delay to ensure it is noticeable
+    LaunchedEffect(Unit) {
+        delay(500) // Adjust delay as needed
+        isVisible = true
+    }
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(270.dp)
-            .background(MaterialTheme.colorScheme.onSurface, RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)),
+            .background(MaterialTheme.colorScheme.surface, shape),
     ) {
         Image(
             painter = painterResource(R.drawable.splashbg),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)),
-            alpha = 0.7f
+            modifier = Modifier.fillMaxSize().clip(shape),
+            alpha = 0.2f
         )
         Column(
             modifier = Modifier.fillMaxWidth().align(Alignment.Center),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(
-                modifier = Modifier
-                    .size(130.dp)
-                    .clip(RoundedCornerShape(75.dp))
-                    .background(brush = Brush.radialGradient(colors = listOf(Color.Green, Color.White), center = Offset(0f, 1f), radius = 305f))
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = slideIn(initialOffset = { IntOffset(0, -300) }, animationSpec = tween(durationMillis = 1000, easing = LinearEasing))
             ) {
-                Image(
-                    painter = painterResource(getUsers()[0].img),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(120.dp).clip(RoundedCornerShape(60.dp)).align(Alignment.Center)
+                Box(
+                    modifier = Modifier
+                        .size(130.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(75.dp))
+                        .background(brush = Brush.radialGradient(colors = listOf(Color.Green, Color.White), center = Offset(0f, 1f), radius = 305f))
+                ) {
+                    Image(
+                        painter = painterResource(getUsers()[0].img),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(120.dp).clip(RoundedCornerShape(60.dp)).align(Alignment.Center)
+                    )
+                }
+            }
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = slideIn(initialOffset = { IntOffset(300, 0) }, animationSpec = tween(durationMillis = 1900, easing = LinearEasing))
+            ) {
+                Text(
+                    text = stringResource(getUsers()[0].name),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-            Text(
-                text = stringResource(getUsers()[0].name),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontWeight = FontWeight.ExtraBold
-            )
-            Text(
-                text = stringResource(R.string.user1_desc),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 70.dp)
-            )
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = slideIn(initialOffset = { IntOffset(-300, 0) }, animationSpec = tween(durationMillis = 2000, easing = LinearEasing))
+            ) {
+                Text(
+                    text = stringResource(R.string.user1_desc),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 70.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
-fun ProfileCards(modifier: Modifier = Modifier) {
+fun CardRow(item: ProfileCardsModel, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .padding(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = item.icon,
+            contentDescription = null
+        )
+        Text(
+            text = item.text,
+            textAlign = TextAlign.Start,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 10.dp).weight(1f)
+        )
+        Icon(
+            imageVector = item.icon2,
+            contentDescription = null
+        )
+    }
+}
+
+@Composable
+fun ProfileCard(items: List<ProfileCardsModel>, verticalPadding: Dp, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier
-            .padding(horizontal = 20.dp, vertical = 15.dp)
+        modifier = modifier
+            .padding(horizontal = 20.dp, vertical = verticalPadding)
     ) {
         Column(
             modifier = Modifier
@@ -143,130 +213,11 @@ fun ProfileCards(modifier: Modifier = Modifier) {
                 .padding(vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Row(
-                modifier = modifier
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.LocationOn,
-                    contentDescription = null
-                )
-                Text(
-                    text = "My Address",
-                    textAlign = TextAlign.Start,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 10.dp).weight(1f)
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null
-                )
-            }
-            Spacer(modifier = Modifier.height(1.dp).fillMaxWidth().border(1.dp, color = Color.White))
-            Row(
-                modifier = modifier
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.AccountBox,
-                    contentDescription = null
-                )
-                Text(
-                    text = "Account",
-                    textAlign = TextAlign.Start,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 10.dp).weight(1f)
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null
-                )
-            }
-        }
-    }
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 20.dp, vertical = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            Row(
-                modifier = modifier
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Notifications,
-                    contentDescription = null
-                )
-                Text(
-                    text = "Notifications",
-                    textAlign = TextAlign.Start,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 10.dp).weight(1f)
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null
-                )
-            }
-            Spacer(modifier = Modifier.height(1.dp).fillMaxWidth().border(1.dp, color = Color.White))
-            Row(
-                modifier = modifier
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Phone,
-                    contentDescription = null
-                )
-                Text(
-                    text = "Contact Us",
-                    textAlign = TextAlign.Start,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 10.dp).weight(1f)
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null
-                )
-            }
-            Spacer(modifier = Modifier.height(1.dp).fillMaxWidth().border(1.dp, color = Color.White))
-            Row(
-                modifier = modifier
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = null
-                )
-                Text(
-                    text = "Rate Our App",
-                    textAlign = TextAlign.Start,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 10.dp).weight(1f)
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null
-                )
+            for (item in items) {
+                CardRow(item)
+                if (items.indexOf(item) + 1 != items.size) {
+                    Spacer(modifier = Modifier.height(1.dp).fillMaxWidth().border(1.dp, color = Color.White))
+                }
             }
         }
     }

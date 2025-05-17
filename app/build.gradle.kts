@@ -77,5 +77,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(kotlin("reflect"))
+    implementation(libs.coil.compose)
     implementation("com.airbnb.android:lottie:6.1.0")
 }

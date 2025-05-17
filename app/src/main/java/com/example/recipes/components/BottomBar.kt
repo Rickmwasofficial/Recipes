@@ -43,7 +43,7 @@ fun IconWithText(@DrawableRes icon: Int?, text: String, isSelected: Boolean, onC
 
     val animatedColor by animateColorAsState(
         targetValue = targetColor,
-        animationSpec = tween(3000),
+        animationSpec = tween(1000),
         label = "Text Color Animation"
     )
 

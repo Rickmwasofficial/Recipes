@@ -7,6 +7,7 @@ import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Spring.StiffnessLow
+import androidx.compose.animation.core.Spring.StiffnessMedium
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,6 +30,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Search
@@ -62,6 +64,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import com.example.recipes.components.BottomNavSection
+import com.example.recipes.components.BoxImage
+import com.example.recipes.components.BoxImageColorBackground
+import com.example.recipes.components.ButtonWithIcon
+import com.example.recipes.components.ImageTextRow
+import com.example.recipes.components.TransitionScopeImg
 import com.example.recipes.data.ArticleData.getArticles
 import com.example.recipes.data.UserData
 import com.example.recipes.model.ArticlesModel
@@ -131,24 +138,7 @@ fun TopNavBar(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround
     ) {
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .background(color = MaterialTheme.colorScheme.background)
-                .border(
-                    1.dp,
-                    MaterialTheme.colorScheme.onBackground,
-                    shape = RoundedCornerShape(25.dp)
-                )
-        ) {
-            Image(
-                painter = painterResource(UserData.getUsers()[0].img),
-                contentDescription = null,
-                contentScale = ContentScale.FillWidth,
-                alignment = Alignment.TopCenter,
-                modifier = Modifier.clip(shape = RoundedCornerShape(25.dp))
-            )
-        }
+        BoxImage(50.dp, RoundedCornerShape(25.dp), UserData.getUsers()[0].img)
         Text(
             text = stringResource(R.string.greeting, stringResource(UserData.getUsers()[0].name)),
             style = MaterialTheme.typography.headlineSmall,
@@ -179,9 +169,7 @@ fun TopNavBar(modifier: Modifier = Modifier) {
                     .background(color = colorResource(R.color.btn), shape = CircleShape)
                     .align(Alignment.TopEnd)
                     .padding(10.dp),
-            ){
-
-            }
+            )
         }
     }
 }
@@ -231,19 +219,7 @@ fun SearchSection(modifier: Modifier = Modifier) {
                     .padding(horizontal = 10.dp)
             )
         }
-        IconButton(
-            onClick = {  },
-            modifier = Modifier
-                .background(color = colorResource(R.color.btn), shape = RoundedCornerShape(10.dp))
-                .height(40.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Search,
-                contentDescription = null,
-                tint =  MaterialTheme.colorScheme.onSurface
-            )
-        }
-
+        ButtonWithIcon(Icons.Rounded.Search, { }, tint = MaterialTheme.colorScheme.onSurface, bgColor = colorResource(R.color.btn))
     }
 }
 
@@ -290,42 +266,12 @@ fun RecipeCard(sharedTransitionScope: SharedTransitionScope, animatedContentScop
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            Box(
-                modifier = modifier
-                    .width(155.dp)
-                    .height(210.dp)
-                    .background(Color.Black)
-                    .clip(shape = RoundedCornerShape(15.dp)),
-            )
-            with(sharedTransitionScope) {
-                Image(
-                    painter = painterResource(meal.img1),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .sharedElement(
-                            sharedContentState = rememberSharedContentState(key = "header-${index}"),
-                            animatedVisibilityScope = animatedContentScope,
-                            boundsTransform = boundsTransform
-                        )
-                        .fillMaxSize()
-                        .clip(shape = RoundedCornerShape(15.dp)),
-                    alpha = 0.6f,
-                )
-            }
-            IconButton(
-                onClick = {  },
-                modifier = Modifier
-                    .height(40.dp)
-                    .align(alignment = Alignment.TopEnd)
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.FavoriteBorder,
-                    contentDescription = null,
-                    tint =  Color.White
-                )
-            }
+            BoxImageColorBackground(meal.img1, RoundedCornerShape(15.dp), index, sharedTransitionScope, animatedContentScope, modifier
+                .width(155.dp)
+                .height(210.dp)
+                .background(Color.Black)
+                .clip(shape = RoundedCornerShape(15.dp)))
+            ButtonWithIcon(Icons.Rounded.FavoriteBorder, { }, Modifier.align(alignment = Alignment.TopEnd), bgColor = Color.Transparent)
             Column(
                 modifier = Modifier
                     .align(alignment = Alignment.BottomStart)
@@ -359,38 +305,8 @@ fun RecipeCard(sharedTransitionScope: SharedTransitionScope, animatedContentScop
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(R.drawable.schedule_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Text(
-                                text = stringResource(meal.time),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.White,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(R.drawable.mood_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                            )
-                            Text(
-                                text = stringResource(meal.servings),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.White,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
+                        ImageTextRow(R.drawable.schedule_24dp_e3e3e3_fill0_wght400_grad0_opsz24, meal.time)
+                        ImageTextRow(R.drawable.mood_24dp_e3e3e3_fill0_wght400_grad0_opsz24, meal.servings)
                     }
                 }
             }
@@ -411,15 +327,15 @@ fun ArticleCard(sharedTransitionScope: SharedTransitionScope, animatedContentSco
             .clip(shape = RoundedCornerShape(15.dp)),
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(shape = RoundedCornerShape(15.dp))
         ) {
             with(sharedTransitionScope) {
-                Image(
-                    painter = painterResource(article.img1),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                TransitionScopeImg(
+                    article.img1,
+                    modifier
+                        .width(255.dp)
                         .weight(1f)
                         .clip(shape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp))
                         .sharedElement(
@@ -469,7 +385,6 @@ fun ArticleCard(sharedTransitionScope: SharedTransitionScope, animatedContentSco
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun RecipesSection(meals: List<MealModel>, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, modifier: Modifier = Modifier) {
-
     val mealsCat1 = meals.map { it.category }.toSet()
     val mealsCat = mutableSetOf(R.string.all) + mealsCat1
     Column(
@@ -505,7 +420,6 @@ fun RecipesSection(meals: List<MealModel>, sharedTransitionScope: SharedTransiti
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ArticleSection(articles: List<ArticlesModel>, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, modifier: Modifier = Modifier) {
-
     Column(
         modifier = modifier
             .fillMaxWidth()

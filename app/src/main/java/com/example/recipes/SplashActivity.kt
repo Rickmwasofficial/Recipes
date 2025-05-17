@@ -70,7 +70,7 @@ class SplashActivity : AppCompatActivity() {
 
             startActivity(intent)
             overridePendingTransition(0, 0) // Disable activity transition
-        }, 7000) // Missing delay parameter
+        }, 1000) // Missing delay parameter
     }
 
 

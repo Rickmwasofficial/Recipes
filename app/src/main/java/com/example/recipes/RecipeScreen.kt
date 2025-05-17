@@ -5,7 +5,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -43,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -58,6 +57,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.recipes.boundsTransform
+import com.example.recipes.components.BoxImage
+import com.example.recipes.components.BoxImageColorBackground
+import com.example.recipes.components.ButtonWithIcon
+import com.example.recipes.components.ImageTextRow
 import com.example.recipes.data.MealData.getMeals
 import com.example.recipes.model.IngredientsModel
 import com.example.recipes.model.MealModel
@@ -90,7 +93,6 @@ fun RecipeScreen(sharedTransitionScope: SharedTransitionScope, animatedContentSc
         }
         Box(Modifier.fillMaxSize().nestedScroll(nestedScrollConnection)) {
             RecipeDesc(currentImageSize, sharedTransitionScope, animatedContentScope, navController = navController, meal = currentMeal, index = text)
-
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -124,38 +126,21 @@ fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, an
             modifier = Modifier
                 .fillMaxSize()
         ) {
+            BoxImageColorBackground(meal.img2, RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomEnd = 16.dp, bottomStart = 16.dp), index, sharedTransitionScope, animatedContentScope, modifier
+                .fillMaxSize()
+                .background(Color.Black))
             Box(
                 modifier = modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceContainer),
-            )
-            with(sharedTransitionScope) {
-                Image(
-                    painter = painterResource(meal.img2),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.CenterStart,
-                    alpha = 0.6f,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .sharedElement(
-                            sharedContentState = rememberSharedContentState(key = "header-${index}"),
-                            animatedVisibilityScope = animatedContentScope,
-                            boundsTransform = boundsTransform
-                        )
-                        .clip(RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomEnd = 16.dp, bottomStart = 16.dp))
-                )
-            }
-            Box(
-                modifier = modifier
-                    .fillMaxSize(),
+                    .background(Color.Transparent),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(imageHeight - 50.dp)
-                        .padding(horizontal = 23.dp),
+                        .padding(horizontal = 23.dp)
+                        .background(Color.Transparent),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -166,36 +151,8 @@ fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, an
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        IconButton(
-                            onClick = { navController.popBackStack() },
-                            modifier = Modifier
-                                .background(
-                                    MaterialTheme.colorScheme.surfaceContainer,
-                                    shape = RoundedCornerShape(10.dp)
-                                )
-                                .height(40.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                                contentDescription = null,
-                                tint =  Color.White
-                            )
-                        }
-                        IconButton(
-                            onClick = {  },
-                            modifier = Modifier
-                                .background(
-                                    MaterialTheme.colorScheme.surfaceContainer,
-                                    shape = RoundedCornerShape(10.dp)
-                                )
-                                .height(40.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.FavoriteBorder,
-                                contentDescription = null,
-                                tint =  Color.White
-                            )
-                        }
+                        ButtonWithIcon(Icons.AutoMirrored.Rounded.ArrowBack,  { navController.popBackStack() })
+                        ButtonWithIcon(Icons.Rounded.FavoriteBorder, { })
                     }
                     Column(
                         modifier = Modifier
@@ -229,38 +186,8 @@ fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, an
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Image(
-                                        painter = painterResource(R.drawable.schedule_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(meal.time),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.ExtraBold
-                                    )
-                                }
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Image(
-                                        painter = painterResource(R.drawable.mood_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(14.dp),
-                                    )
-                                    Text(
-                                        text = stringResource(meal.servings),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.ExtraBold
-                                    )
-                                }
+                                ImageTextRow(R.drawable.schedule_24dp_e3e3e3_fill0_wght400_grad0_opsz24, meal.time)
+                                ImageTextRow(R.drawable.mood_24dp_e3e3e3_fill0_wght400_grad0_opsz24, meal.servings)
                             }
                         }
                         Text(
@@ -289,7 +216,7 @@ fun IngredientCard(ingredient: IngredientsModel, modifier: Modifier = Modifier) 
             .clip(shape = RoundedCornerShape(15.dp)),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 10.dp,
-            draggedElevation = 20.dp,
+            draggedElevation = 50.dp,
             pressedElevation = 20.dp
         )
     ) {
@@ -299,27 +226,7 @@ fun IngredientCard(ingredient: IngredientsModel, modifier: Modifier = Modifier) 
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
         ) {
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .background(color = Color.Transparent)
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.onBackground,
-                        shape = RoundedCornerShape(30.dp)
-                    )
-            ) {
-                Image(
-                    painter = painterResource(ingredient.img),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.TopCenter,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(shape = RoundedCornerShape(30.dp))
-                )
-            }
-
+            BoxImage(60.dp, RoundedCornerShape(30.dp), ingredient.img)
             Column(
                 verticalArrangement = Arrangement.spacedBy(1.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
