@@ -1,5 +1,6 @@
 package com.example.recipes
 
+import HomeViewModelFactory
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentScope
@@ -7,11 +8,8 @@ import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Spring.StiffnessLow
-import androidx.compose.animation.core.Spring.StiffnessMedium
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Search
@@ -39,28 +37,24 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import com.example.recipes.components.BottomNavSection
@@ -69,7 +63,7 @@ import com.example.recipes.components.BoxImageColorBackground
 import com.example.recipes.components.ButtonWithIcon
 import com.example.recipes.components.ImageTextRow
 import com.example.recipes.components.TransitionScopeImg
-import com.example.recipes.data.ArticleData.getArticles
+import com.example.recipes.data.MealRepository
 import com.example.recipes.data.UserData
 import com.example.recipes.model.ArticlesModel
 import com.example.recipes.model.MealModel
@@ -83,18 +77,22 @@ val boundsTransform = BoundsTransform { initialBounds, targetBounds ->
 @OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeScreen(meals: List<MealModel>, articles: List<ArticlesModel>, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, navBackStackEntry: NavBackStackEntry, modifier: Modifier = Modifier) {
+fun HomeScreen(sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, navBackStackEntry: NavBackStackEntry, modifier: Modifier = Modifier, mealRepository: MealRepository,
+               homeViewModel: HomeViewModel = viewModel(
+                   factory = HomeViewModelFactory(mealRepository)
+               )) {
         Scaffold(
             modifier = modifier
                 .fillMaxSize(),
             containerColor = MaterialTheme.colorScheme.background
         ) { innerPadding ->
-            FullHomeScreen(meals, articles, sharedTransitionScope, animatedContentScope, navController, navBackStackEntry, modifier = Modifier.padding(innerPadding))
+            val homeUiState by homeViewModel.uiState.collectAsState()
+            FullHomeScreen(homeUiState.meals, homeUiState.category, homeUiState.categories, homeViewModel, homeUiState.searchString, homeUiState.articles, sharedTransitionScope, animatedContentScope, navController, navBackStackEntry, modifier = Modifier.padding(innerPadding))
         }
 }
 
 fun navigateToRecipe(navController: NavHostController, mealNo: Int) {
-    navController.navigate(Screen.Recipe.createRoute(mealNo))
+    navController.navigate(Screen.Recipe.createRoute(mealNo - 1))
 }
 
 fun navigateToArticle(navController: NavHostController, articleNo: Int) {
@@ -104,14 +102,14 @@ fun navigateToArticle(navController: NavHostController, articleNo: Int) {
 @OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FullHomeScreen(meals: List<MealModel>, articles: List<ArticlesModel>, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, navBackStackEntry: NavBackStackEntry, modifier: Modifier = Modifier) {
+fun FullHomeScreen(meals: List<MealModel>, currentCat: Int, categories: Set<Int>, homeViewModel: HomeViewModel, searchString: String, articles: List<ArticlesModel>, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, navBackStackEntry: NavBackStackEntry, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background),
     ) {
         TopNavBar()
-        SearchSection()
+        SearchSection(homeViewModel, searchString)
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -119,7 +117,7 @@ fun FullHomeScreen(meals: List<MealModel>, articles: List<ArticlesModel>, shared
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             item {
-                RecipesSection(meals, sharedTransitionScope, animatedContentScope, navController)
+                RecipesSection(meals, currentCat, categories, homeViewModel, sharedTransitionScope, animatedContentScope, navController)
             }
             item {
                 ArticleSection(articles, sharedTransitionScope, animatedContentScope, navController)
@@ -176,7 +174,8 @@ fun TopNavBar(modifier: Modifier = Modifier) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SearchSection(modifier: Modifier = Modifier) {
+fun SearchSection(homeViewModel: HomeViewModel, searchString: String, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -195,7 +194,7 @@ fun SearchSection(modifier: Modifier = Modifier) {
                 ),
             contentAlignment = Alignment.CenterStart,
         ) {
-            if (true) {
+            if (searchString == "") {
                 Text(
                     text = "Search Recipe",
                     color = MaterialTheme.colorScheme.secondary,
@@ -206,8 +205,8 @@ fun SearchSection(modifier: Modifier = Modifier) {
                 )
             }
             BasicTextField(
-                value = "",
-                onValueChange = {  },
+                value = searchString,
+                onValueChange = { homeViewModel.searchItems(it, context) },
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.secondary
@@ -219,19 +218,19 @@ fun SearchSection(modifier: Modifier = Modifier) {
                     .padding(horizontal = 10.dp)
             )
         }
-        ButtonWithIcon(Icons.Rounded.Search, { }, tint = MaterialTheme.colorScheme.onSurface, bgColor = colorResource(R.color.btn))
+        ButtonWithIcon(Icons.Rounded.Search, { homeViewModel.searchItems(searchString, context) }, tint = MaterialTheme.colorScheme.onSurface, bgColor = colorResource(R.color.btn))
     }
 }
 
 @Composable
-fun CategoryBtn(category: Int, modifier: Modifier = Modifier) {
+fun CategoryBtn(category: Int, currentCat: Int, homeViewModel: HomeViewModel, modifier: Modifier = Modifier) {
     Button(
-        onClick = {  },
+        onClick = { homeViewModel.filterRecipes(category) },
         modifier = modifier
             .padding(end = 5.dp)
             .height(35.dp),
         colors = ButtonColors(
-            containerColor = if (stringResource(category) == "All") {
+            containerColor = if (stringResource(category) == stringResource(currentCat)) {
                 colorResource(R.color.btn)
             } else {
                 MaterialTheme.colorScheme.surfaceContainer
@@ -249,7 +248,9 @@ fun CategoryBtn(category: Int, modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RecipeCard(sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, index: Int, meal: MealModel, modifier: Modifier = Modifier) {
+fun RecipeCard(sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, index: Int, meal: MealModel, homeViewModel: HomeViewModel, modifier: Modifier = Modifier) {
+    val icon = if (meal.liked) Icons.Filled.Favorite else Icons.Rounded.FavoriteBorder
+
     ElevatedCard(
         onClick = { navigateToRecipe(navController, index) },
         modifier = modifier
@@ -266,12 +267,17 @@ fun RecipeCard(sharedTransitionScope: SharedTransitionScope, animatedContentScop
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            BoxImageColorBackground(meal.img1, RoundedCornerShape(15.dp), index, sharedTransitionScope, animatedContentScope, modifier
+            BoxImageColorBackground(meal.img1, RoundedCornerShape(15.dp), meal.id, sharedTransitionScope, animatedContentScope, modifier
                 .width(155.dp)
                 .height(210.dp)
                 .background(Color.Black)
                 .clip(shape = RoundedCornerShape(15.dp)))
-            ButtonWithIcon(Icons.Rounded.FavoriteBorder, { }, Modifier.align(alignment = Alignment.TopEnd), bgColor = Color.Transparent)
+            ButtonWithIcon(
+                icon,
+                { homeViewModel.likeItem(meal.id) },
+                Modifier.align(alignment = Alignment.TopEnd),
+                bgColor = Color.Transparent,
+                tint = if (meal.liked) Color.Green else Color.White)
             Column(
                 modifier = Modifier
                     .align(alignment = Alignment.BottomStart)
@@ -288,7 +294,7 @@ fun RecipeCard(sharedTransitionScope: SharedTransitionScope, animatedContentScop
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier
                             .sharedElement(
-                                sharedContentState = rememberSharedContentState(key = "title-${index}"),
+                                sharedContentState = rememberSharedContentState(key = "title-${meal.id}"),
                                 animatedVisibilityScope = animatedContentScope,
                                 boundsTransform = boundsTransform
                             )
@@ -297,7 +303,7 @@ fun RecipeCard(sharedTransitionScope: SharedTransitionScope, animatedContentScop
                         modifier = Modifier
                             .height(20.dp)
                             .sharedElement(
-                                sharedContentState = rememberSharedContentState(key = "row-${index}"),
+                                sharedContentState = rememberSharedContentState(key = "row-${meal.id}"),
                                 animatedVisibilityScope = animatedContentScope,
                                 boundsTransform = boundsTransform
                             )
@@ -384,9 +390,7 @@ fun ArticleCard(sharedTransitionScope: SharedTransitionScope, animatedContentSco
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RecipesSection(meals: List<MealModel>, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, modifier: Modifier = Modifier) {
-    val mealsCat1 = meals.map { it.category }.toSet()
-    val mealsCat = mutableSetOf(R.string.all) + mealsCat1
+fun RecipesSection(meals: List<MealModel>, currentCat: Int, categories: Set<Int>, homeViewModel: HomeViewModel, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -404,13 +408,13 @@ fun RecipesSection(meals: List<MealModel>, sharedTransitionScope: SharedTransiti
             modifier = Modifier
         ) {
 
-            items(mealsCat.toList()) { category ->
-                CategoryBtn(category)
+            items(categories.toList()) { category ->
+                CategoryBtn(category, currentCat, homeViewModel)
             }
         }
         LazyRow() {
             itemsIndexed(meals) { index, meal ->
-                RecipeCard(sharedTransitionScope, animatedContentScope, navController, index, meal)
+                RecipeCard(sharedTransitionScope, animatedContentScope, navController, meal.id, meal, homeViewModel)
             }
         }
 

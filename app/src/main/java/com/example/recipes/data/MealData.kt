@@ -1,12 +1,15 @@
 package com.example.recipes.data
 
+import kotlinx.coroutines.flow.StateFlow
 import com.example.recipes.R
 import com.example.recipes.model.IngredientsModel
 import com.example.recipes.model.MealModel
+import kotlinx.coroutines.flow.MutableStateFlow
 
 object MealData {
-    private val allMeals = listOf(
+    private var _meals = MutableStateFlow(listOf(
         MealModel(
+            id = 1,
             img1 = R.drawable.pancakes,
             img2 = R.drawable.pancakes_alt,
             name = R.string.pancakes_name,
@@ -15,6 +18,7 @@ object MealData {
             time = R.string.pancakes_time,
             servings = R.string.pancakes_servings,
             category = R.string.breakfast_category,
+            liked = true,
             ingredients = listOf(
                 IngredientsModel(R.string.flour, R.string.flour_qty, R.drawable.flour_img),
                 IngredientsModel(R.string.eggs, R.string.eggs_qty, R.drawable.eggs_img),
@@ -24,6 +28,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 2,
             img1 = R.drawable.pasta_dish,
             img2 = R.drawable.pasta_dish_alt,
             name = R.string.pasta_name,
@@ -40,6 +45,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 3,
             img1 = R.drawable.vegan_bowl,
             img2 = R.drawable.vegan_bowl_alt,
             name = R.string.vegan_bowl_name,
@@ -56,6 +62,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 4,
             img1 = R.drawable.grilled_cheese,
             img2 = R.drawable.grilled_cheese_alt,
             name = R.string.grilled_cheese_name,
@@ -71,6 +78,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 5,
             img1 = R.drawable.chicken_curry,
             img2 = R.drawable.chicken_curry_alt,
             name = R.string.chicken_curry_name,
@@ -89,6 +97,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 6,
             img1 = R.drawable.veggie_burger,
             img2 = R.drawable.veggie_burger_alt,
             name = R.string.veggie_burger_name,
@@ -106,6 +115,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 7,
             img1 = R.drawable.chicken_salad,
             img2 = R.drawable.chicken_salad_alt,
             name = R.string.chicken_salad_name,
@@ -123,6 +133,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 8,
             img1 = R.drawable.spaghetti_bolognese,
             img2 = R.drawable.spaghetti_bolognese_alt,
             name = R.string.spaghetti_bolognese_name,
@@ -141,6 +152,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 9,
             img1 = R.drawable.mango_smoothie,
             img2 = R.drawable.mango_smoothie_alt,
             name = R.string.mango_smoothie_name,
@@ -157,6 +169,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 10,
             img1 = R.drawable.steak,
             img2 = R.drawable.steak_alt,
             name = R.string.steak_name,
@@ -173,6 +186,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 11,
             img1 = R.drawable.fruit_salad,
             img2 = R.drawable.fruit_salad_alt,
             name = R.string.fruit_salad_name,
@@ -189,6 +203,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 12,
             img1 = R.drawable.tacos,
             img2 = R.drawable.tacos_alt,
             name = R.string.tacos_name,
@@ -205,6 +220,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 13,
             img1 = R.drawable.sushi_roll,
             img2 = R.drawable.sushi_roll_alt,
             name = R.string.sushi_roll_name,
@@ -222,6 +238,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 14,
             img1 = R.drawable.vegetable_stir_fry,
             img2 = R.drawable.vegetable_stir_fry_alt,
             name = R.string.vegetable_stir_fry_name,
@@ -240,6 +257,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 15,
             img1 = R.drawable.pizza,
             img2 = R.drawable.pizza_alt,
             name = R.string.pizza_name,
@@ -258,6 +276,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 16,
             img1 = R.drawable.chocolate_cake,
             img2 = R.drawable.chocolate_cake_alt,
             name = R.string.chocolate_cake_name,
@@ -276,6 +295,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 17,
             img1 = R.drawable.omelette,
             img2 = R.drawable.omelette_alt,
             name = R.string.omelette_name,
@@ -293,6 +313,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 18,
             img1 = R.drawable.falafel,
             img2 = R.drawable.falafel_alt,
             name = R.string.falafel_name,
@@ -311,6 +332,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 19,
             img1 = R.drawable.vegetable_pasta,
             img2 = R.drawable.vegetable_pasta_alt,
             name = R.string.vegetable_pasta_name,
@@ -329,6 +351,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 20,
             img1 = R.drawable.french_toast,
             img2 = R.drawable.french_toast_alt,
             name = R.string.french_toast_name,
@@ -347,6 +370,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 21,
             img1 = R.drawable.vegan_stir_fry,
             img2 = R.drawable.vegan_stir_fry_alt,
             name = R.string.vegan_stir_fry_name,
@@ -365,6 +389,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 22,
             img1 = R.drawable.breakfast_bowl,
             img2 = R.drawable.breakfast_bowl_alt,
             name = R.string.breakfast_bowl_name,
@@ -382,6 +407,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 23,
             img1 = R.drawable.stuffed_peppers,
             img2 = R.drawable.stuffed_peppers_alt,
             name = R.string.stuffed_peppers_name,
@@ -400,6 +426,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 24,
             img1 = R.drawable.grilled_vegetables,
             img2 = R.drawable.grilled_vegetables_alt,
             name = R.string.grilled_vegetables_name,
@@ -418,6 +445,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 25,
             img1 = R.drawable.mushroom_risotto,
             img2 = R.drawable.mushroom_risotto_alt,
             name = R.string.mushroom_risotto_name,
@@ -435,6 +463,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 26,
             img1 = R.drawable.baked_ziti,
             img2 = R.drawable.baked_ziti_alt,
             name = R.string.baked_ziti_name,
@@ -452,6 +481,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 27,
             img1 = R.drawable.pulled_pork_sandwich,
             img2 = R.drawable.pulled_pork_sandwich_alt,
             name = R.string.pulled_pork_sandwich_name,
@@ -469,6 +499,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 28,
             img1 = R.drawable.vegetable_stir_fry,
             img2 = R.drawable.vegetable_stir_fry_alt,
             name = R.string.vegetable_stir_fry_name,
@@ -486,6 +517,7 @@ object MealData {
             )
         ),
         MealModel(
+            id = 29,
             img1 = R.drawable.vegetable_biryani,
             img2 = R.drawable.vegetable_biryani_alt,
             name = R.string.vegetable_biryani_name,
@@ -503,6 +535,7 @@ object MealData {
         ),
 
         MealModel(
+            id = 30,
             img1 = R.drawable.spaghetti_carbonara,
             img2 = R.drawable.spaghetti_carbonara_alt,
             name = R.string.spaghetti_carbonara_name,
@@ -518,7 +551,17 @@ object MealData {
                 IngredientsModel(R.string.parmesan, R.string.parmesan_qty, R.drawable.parmesan_img)
             )
         )
-    )
+    ))
 
-    fun getMeals(): List<MealModel> = allMeals
+    var meals: StateFlow<List<MealModel>> = _meals
+
+    fun toggleLike(id: Int) {
+        _meals.value = _meals.value.map { meal ->
+            if (meal.id == id) {
+                meal.copy(liked = !meal.liked)
+            } else {
+                meal
+            }
+        }
+    }
 }

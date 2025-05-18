@@ -13,10 +13,6 @@ import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.lottie.LottieAnimationView
-import com.example.recipes.data.ArticleData.getArticles
-import com.example.recipes.data.MealData.getMeals
-import com.example.recipes.model.ArticlesModel
-import com.example.recipes.model.MealModel
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
@@ -54,23 +50,13 @@ class SplashActivity : AppCompatActivity() {
         Log.d(TAG, "Receiver registered in onCreate().")
 
         Handler(Looper.getMainLooper()).postDelayed({
-            // Prepare data for MainActivity
-            val articlesList = ArrayList<ArticlesModel>()
-            // Add articles to the list...
-            articlesList.addAll(getArticles())
-
-            val mealsList = ArrayList<MealModel>()
-            // Add meals to the list...
-            mealsList.addAll(getMeals())
 
             val intent = Intent(this, MainActivity::class.java)
-            intent.putParcelableArrayListExtra("articles_list", articlesList)
-            intent.putParcelableArrayListExtra("meals_list", mealsList)
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
 
             startActivity(intent)
             overridePendingTransition(0, 0) // Disable activity transition
-        }, 1000) // Missing delay parameter
+        }, 3000) // Missing delay parameter
     }
 
 

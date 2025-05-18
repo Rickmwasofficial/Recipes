@@ -1,11 +1,9 @@
 package com.example.recipes
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,24 +12,16 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import kotlinx.coroutines.delay
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.recipes.data.ArticleData.getArticles
-import com.example.recipes.data.MealData.getMeals
-import com.example.recipes.model.ArticlesModel
-import com.example.recipes.model.MealModel
+import com.example.recipes.data.MealRepository
 import com.example.recipes.ui.theme.RecipesTheme
 
 sealed class Screen(val route: String) {
@@ -58,22 +48,9 @@ class MainActivity : ComponentActivity() {
 
         // Used to track when the UI is ready
         var uiReady = false
-
+        val mealRepository = MealRepository()
         setContent {
-            RecipesTheme {// Safely extract parcelable extras with null handling
-                val meals = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    intent.getParcelableArrayListExtra("meals_list", MealModel::class.java)
-                } else {
-                    @Suppress("DEPRECATION")
-                    intent.getParcelableArrayListExtra<MealModel>("meals_list")
-                }
-                val articles = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    intent.getParcelableArrayListExtra("articles_list", ArticlesModel::class.java)
-                } else {
-                    @Suppress("DEPRECATION")
-                    intent.getParcelableArrayListExtra<ArticlesModel>("articles_list")
-                }
-
+            RecipesTheme {
                 val context = LocalContext.current
 
                 // This tracks when composition has completed
@@ -90,12 +67,7 @@ class MainActivity : ComponentActivity() {
                     context.sendBroadcast(finishIntent)
                     Log.d(TAG, "Broadcast sent to finish splash screen")
                 }
-
-                // Use null-safe operators to safely handle potentially null extras
-                val mealsList = meals?.toList() ?: emptyList()
-                val articlesList = articles?.toList() ?: emptyList()
-
-                NavigationStack(mealsList, articlesList)
+                NavigationStack(mealRepository = mealRepository)
             }
         }
     }
@@ -104,7 +76,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NavigationStack(meals: List<MealModel>, articles: List<ArticlesModel>, modifier: Modifier = Modifier) {
+fun NavigationStack(modifier: Modifier = Modifier, mealRepository: MealRepository) {
     val navController = rememberNavController()
     val navBackStackEntry = navController.currentBackStackEntryAsState().value
     SharedTransitionLayout {
@@ -117,12 +89,11 @@ fun NavigationStack(meals: List<MealModel>, articles: List<ArticlesModel>, modif
             ) {
                 if (navBackStackEntry != null) {
                     HomeScreen(
-                        meals,
-                        articles,
                         this@SharedTransitionLayout,
                         this,
                         navController,
-                        navBackStackEntry
+                        navBackStackEntry,
+                        mealRepository = mealRepository
                     )
                 }
             }
@@ -130,7 +101,7 @@ fun NavigationStack(meals: List<MealModel>, articles: List<ArticlesModel>, modif
                 route = Screen.Fav.route,
             ) {
                 if (navBackStackEntry != null) {
-                    FavoriteScreen(navBackStackEntry, navController)
+                    FavoriteScreen(navBackStackEntry, navController, mealRepository = mealRepository)
                 }
             }
             composable(
@@ -154,7 +125,8 @@ fun NavigationStack(meals: List<MealModel>, articles: List<ArticlesModel>, modif
                     this@SharedTransitionLayout,
                     this,
                     navController = navController,
-                    text = text)
+                    text = text!!,
+                    mealRepository = mealRepository)
             }
             composable(
                 route = Screen.Article.route,

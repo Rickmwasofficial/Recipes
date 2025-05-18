@@ -128,7 +128,7 @@ fun TopProfile(modifier: Modifier = Modifier) {
         ) {
             AnimatedVisibility(
                 visible = isVisible,
-                enter = slideIn(initialOffset = { IntOffset(0, -300) }, animationSpec = tween(durationMillis = 1000, easing = LinearEasing))
+                enter = slideIn(initialOffset = { IntOffset(0, -300) }, animationSpec = tween(durationMillis = 800, easing = LinearEasing))
             ) {
                 Box(
                     modifier = Modifier
@@ -147,7 +147,7 @@ fun TopProfile(modifier: Modifier = Modifier) {
             }
             AnimatedVisibility(
                 visible = isVisible,
-                enter = slideIn(initialOffset = { IntOffset(300, 0) }, animationSpec = tween(durationMillis = 1900, easing = LinearEasing))
+                enter = slideIn(initialOffset = { IntOffset(300, 0) }, animationSpec = tween(durationMillis = 900, easing = LinearEasing))
             ) {
                 Text(
                     text = stringResource(getUsers()[0].name),
@@ -160,7 +160,7 @@ fun TopProfile(modifier: Modifier = Modifier) {
             }
             AnimatedVisibility(
                 visible = isVisible,
-                enter = slideIn(initialOffset = { IntOffset(-300, 0) }, animationSpec = tween(durationMillis = 2000, easing = LinearEasing))
+                enter = slideIn(initialOffset = { IntOffset(-300, 0) }, animationSpec = tween(durationMillis = 1100, easing = LinearEasing))
             ) {
                 Text(
                     text = stringResource(R.string.user1_desc),

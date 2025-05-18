@@ -1,6 +1,8 @@
 package com.example.recipes
 
+import FavoriteViewModelFactory
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,8 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -30,27 +34,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import com.example.recipes.components.BottomNavSection
 import com.example.recipes.components.BoxImage
 import com.example.recipes.components.ImageTextRow
-import com.example.recipes.data.MealData.getMeals
+import com.example.recipes.data.MealRepository
 import com.example.recipes.model.MealModel
 import com.example.recipes.ui.theme.RecipesTheme
 
 @Composable
-fun FavoriteScreen(navBackStackEntry: NavBackStackEntry, navController: NavHostController, modifier: Modifier = Modifier) {
+fun FavoriteScreen(navBackStackEntry: NavBackStackEntry, navController: NavHostController, mealRepository: MealRepository,
+                   modifier: Modifier = Modifier,
+                   favoriteViewModel: FavoriteViewModel = viewModel(
+                       factory = FavoriteViewModelFactory(mealRepository)
+                   )) {
+    val favoriteUiState by favoriteViewModel.uiState.collectAsState()
     Scaffold(
         modifier = modifier.fillMaxSize(),
     ) { innerPadding ->
-        Favorites(navBackStackEntry, navController, Modifier.padding(innerPadding))
+        Favorites(favoriteUiState.favMeals, favoriteViewModel, navBackStackEntry, navController, Modifier.padding(innerPadding))
     }
 }
 
 
 @Composable
-fun FavoriteCard(mealModel: MealModel, modifier: Modifier = Modifier) {
+fun FavoriteCard(mealModel: MealModel, favoriteViewModel: FavoriteViewModel, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .padding(10.dp)
@@ -89,6 +99,7 @@ fun FavoriteCard(mealModel: MealModel, modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .padding(end = 15.dp)
+                    .clickable(onClick = { favoriteViewModel.likeItem(mealModel.id) })
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Delete,
@@ -102,7 +113,7 @@ fun FavoriteCard(mealModel: MealModel, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Favorites(navBackStackEntry: NavBackStackEntry, navController: NavHostController, modifier: Modifier = Modifier) {
+fun Favorites(meal: MutableList<MealModel>, favoriteViewModel: FavoriteViewModel, navBackStackEntry: NavBackStackEntry, navController: NavHostController, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize(),
@@ -129,8 +140,8 @@ fun Favorites(navBackStackEntry: NavBackStackEntry, navController: NavHostContro
         LazyColumn(
             modifier = Modifier.weight(1f)
         ) {
-            items(getMeals()) { meal ->
-                FavoriteCard(meal)
+            items(meal) { meal ->
+                FavoriteCard(meal, favoriteViewModel)
             }
         }
         BottomNavSection(navBackStackEntry, navController)

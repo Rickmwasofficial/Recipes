@@ -1,5 +1,7 @@
 package com.example.recipes
 
+import HomeViewModelFactory
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -21,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -32,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,22 +59,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.recipes.boundsTransform
 import com.example.recipes.components.BoxImage
 import com.example.recipes.components.BoxImageColorBackground
 import com.example.recipes.components.ButtonWithIcon
 import com.example.recipes.components.ImageTextRow
-import com.example.recipes.data.MealData.getMeals
+import com.example.recipes.data.MealData.meals
+import com.example.recipes.data.MealRepository
 import com.example.recipes.model.IngredientsModel
 import com.example.recipes.model.MealModel
 import com.example.recipes.ui.theme.RecipesTheme
 
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RecipeScreen(sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, text: Int?, modifier: Modifier = Modifier) {
-    val currentMeal = getMeals()[text!!]
+fun RecipeScreen(sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, text: Int, modifier: Modifier = Modifier, mealRepository: MealRepository, homeViewModel: HomeViewModel = viewModel(
+    factory = HomeViewModelFactory(mealRepository)
+)) {
+    val currentMeal = mealRepository.meals.value[text]
     Surface(
         modifier = modifier
             .fillMaxSize()
@@ -92,7 +101,7 @@ fun RecipeScreen(sharedTransitionScope: SharedTransitionScope, animatedContentSc
             }
         }
         Box(Modifier.fillMaxSize().nestedScroll(nestedScrollConnection)) {
-            RecipeDesc(currentImageSize, sharedTransitionScope, animatedContentScope, navController = navController, meal = currentMeal, index = text)
+            RecipeDesc(currentImageSize, sharedTransitionScope, animatedContentScope, navController = navController, meal = currentMeal, index = text, homeViewModel = homeViewModel)
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -115,7 +124,8 @@ fun RecipeScreen(sharedTransitionScope: SharedTransitionScope, animatedContentSc
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, index: Int, modifier: Modifier = Modifier, meal: MealModel = getMeals()[19]) {
+fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, animatedContentScope: AnimatedContentScope, navController: NavHostController, index: Int, modifier: Modifier = Modifier, meal: MealModel, homeViewModel: HomeViewModel) {
+    val icon = if (meal.liked) Icons.Filled.Favorite else Icons.Rounded.FavoriteBorder
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -126,7 +136,7 @@ fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, an
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            BoxImageColorBackground(meal.img2, RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomEnd = 16.dp, bottomStart = 16.dp), index, sharedTransitionScope, animatedContentScope, modifier
+            BoxImageColorBackground(meal.img2, RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomEnd = 16.dp, bottomStart = 16.dp), meal.id, sharedTransitionScope, animatedContentScope, modifier
                 .fillMaxSize()
                 .background(Color.Black))
             Box(
@@ -152,7 +162,7 @@ fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, an
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         ButtonWithIcon(Icons.AutoMirrored.Rounded.ArrowBack,  { navController.popBackStack() })
-                        ButtonWithIcon(Icons.Rounded.FavoriteBorder, { })
+                        ButtonWithIcon(icon, { homeViewModel.likeItem(meal.id) }, tint = if (meal.liked) Color.Green else Color.White)
                     }
                     Column(
                         modifier = Modifier
@@ -169,7 +179,7 @@ fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, an
                                 fontWeight = FontWeight.ExtraBold,
                                 modifier = Modifier
                                     .sharedElement(
-                                        sharedContentState = rememberSharedContentState(key = "title-${index}"),
+                                        sharedContentState = rememberSharedContentState(key = "title-${meal.id}"),
                                         animatedVisibilityScope = animatedContentScope,
                                         boundsTransform = boundsTransform
                                     )
@@ -179,7 +189,7 @@ fun RecipeDesc(imageHeight: Dp, sharedTransitionScope: SharedTransitionScope, an
                                 modifier = Modifier
                                     .height(20.dp)
                                     .sharedElement(
-                                        sharedContentState = rememberSharedContentState(key = "row-${index}"),
+                                        sharedContentState = rememberSharedContentState(key = "row-${meal.id}"),
                                         animatedVisibilityScope = animatedContentScope,
                                         boundsTransform = boundsTransform
                                     ),
@@ -289,24 +299,6 @@ fun About(meal: MealModel, modifier: Modifier = Modifier) {
             text = stringResource(meal.about),
             style = MaterialTheme.typography.bodyMedium
         )
-        Button(
-            onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 10.dp),
-            colors = ButtonColors(
-                containerColor = colorResource(R.color.btn),
-                contentColor = Color.White,
-                disabledContentColor = Color.White,
-                disabledContainerColor = colorResource(R.color.btn)
-            ),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text(
-                text = "Add To Favourites",
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
     }
 }
 
